@@ -38,7 +38,7 @@ class KioskScreenDimmerLight(LightEntity):
         self._entry_id = entry_id
         self._is_on = False
         self._brightness = 0
-        self._last_nonzero_brightness = 255
+        self._last_nonzero_brightness = 128
 
     @property
     def color_mode(self) -> ColorMode:
@@ -61,10 +61,10 @@ class KioskScreenDimmerLight(LightEntity):
         if brightness is None:
             brightness_pct = kwargs.get(ATTR_BRIGHTNESS_PCT)
             if brightness_pct is not None:
-                brightness = round(255 * int(brightness_pct) / 100)
+                brightness = round(255 * float(brightness_pct) / 100)
 
         if brightness is None:
-            brightness = self._last_nonzero_brightness or 255
+            brightness = self._last_nonzero_brightness or 128
 
         brightness = max(1, min(255, int(brightness)))
         self._brightness = brightness
