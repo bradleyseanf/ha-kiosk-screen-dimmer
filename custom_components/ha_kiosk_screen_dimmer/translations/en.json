@@ -1,0 +1,11 @@
+{
+  "title": "HA Kiosk Screen Dimmer",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up HA Kiosk Screen Dimmer",
+        "description": "Creates a virtual light entity that drives the kiosk overlay."
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "domain": "ha_kiosk_screen_dimmer",
+  "name": "HA Kiosk Screen Dimmer",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "requirements": [],
+  "version": "0.0.1"
+}
