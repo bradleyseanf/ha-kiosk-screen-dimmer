@@ -13,7 +13,7 @@ It is controllable either by:
 
 ## Installation
 
-1.) Copy the `night-dim-overlay.js` file into `/homeassistant/www/`.
+1.) Copy the `brightness-dimmer.js` file into `/homeassistant/www/`.
 
 2.) Copy the entire `ha_kiosk_screen_dimmer` folder into `/homeassistant/custom_components/`.
 
