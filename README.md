@@ -13,15 +13,15 @@ It is controllable either by:
 
 ## Installation
 
-Copy `night-dim-overlay.js` into `/homeassistant/www/`.
+1.) Copy the `night-dim-overlay.js` file into `/homeassistant/www/`.
 
-Copy `ha_kiosk_screen_dimmer` into `/homeassistant/custom_components/`.
+2.) Copy the entire `ha_kiosk_screen_dimmer` folder into `/homeassistant/custom_components/`.
 
-Restart Home Assistant.
+3.) Restart Home Assistant.
 
-Open Home Assistant and go to `Settings → Devices & Services`.
+4.) Open Home Assistant and go to `Settings → Devices & Services`.
 
-Add `HA Kiosk Screen Dimmer`.
+5.) Add `HA Kiosk Screen Dimmer`.
 
 Home Assistant will create the virtual light entity automatically.
 
