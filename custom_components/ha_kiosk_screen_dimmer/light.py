@@ -1,4 +1,4 @@
-"""Virtual light entity for HA Kiosk Screen Dimmer."""
+"""Virtual light entity for Screen Dimmer."""
 
 from __future__ import annotations
 
@@ -14,8 +14,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-DOMAIN = "ha_kiosk_screen_dimmer"
-NAME = "HA Kiosk Screen Dimmer"
+from . import DOMAIN, NAME
 
 
 async def async_setup_entry(
@@ -31,6 +30,7 @@ class KioskScreenDimmerLight(LightEntity):
 
     _attr_has_entity_name = True
     _attr_name = NAME
+    _attr_icon = "mdi:brightness-6"
     _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
     _attr_should_poll = False
 

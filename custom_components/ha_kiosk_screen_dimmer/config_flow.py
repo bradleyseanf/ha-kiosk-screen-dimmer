@@ -1,9 +1,8 @@
-"""Config flow for HA Kiosk Screen Dimmer."""
+"""Config flow for Screen Dimmer."""
 
 from homeassistant.config_entries import ConfigFlow
 
-DOMAIN = "ha_kiosk_screen_dimmer"
-NAME = "HA Kiosk Screen Dimmer"
+from . import DOMAIN, NAME
 
 
 class KioskScreenDimmerConfigFlow(ConfigFlow, domain=DOMAIN):
