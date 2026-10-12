@@ -50,11 +50,14 @@ light_slider_type: brightness
 | --- | --- | --- | --- |
 | `entity` | string | required | The entity that turns the overlay on and off. |
 | `brightness_entity` | string | none | Optional separate brightness source. |
-| `opacity` | number | `0.5` | Overlay opacity for boolean-driven use or as a fallback when brightness is unavailable. |
+| `combine` | string | `gate` | `gate` requires the primary entity to be on; `either` lets the slider work independently and retains the primary on/off tint when the slider is off. |
+| `opacity` | number | `0.5` | Overlay opacity for boolean-driven use or as a fallback when brightness is unavailable, capped by `max_opacity`. |
+| `max_opacity` | number | `0.85` | Tint at 100% slider brightness; configurable from 0 to an absolute safety cap of 0.95. |
 | `brightness_scale` | number | `100` | Scale used when the brightness source is not a light entity. |
 | `color` | string | `#000000` | Overlay color. |
 | `overlay_id` | string | `ha-kiosk-screen-dimmer-overlay` | DOM id used for the overlay element. |
 | `transition` | string | `opacity 180ms ease-in-out` | CSS transition for the overlay fade. |
 | `z_index` | number | `99999` | Overlay stacking order. |
+| `scope` | string | `dashboard` | Limit the overlay to this dashboard by default; `view` or `all` must be selected explicitly. |
 
-The overlay uses a hardcoded safety cap below full opacity so the screen never becomes completely black.
+For a scheduled night toggle plus an independent light slider, use one `custom:screen-dimmer-overlay` card with the toggle as `entity`, the light as `brightness_entity`, and `combine: either`. An enabled toggle retains its configured `opacity` when the slider is off or unavailable; both off clears the tint. The overlay is click-through and never exceeds `max_opacity` or the 0.95 absolute cap.
