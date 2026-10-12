@@ -21,7 +21,7 @@ The light brightness controls tint strength, not the display backlight. Off or 0
 
 Home Assistant will create the virtual light entity automatically.
 
-4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.0.2` as a JavaScript module in `Settings -> Dashboards -> Resources`.
+4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.0.3` as a JavaScript module in `Settings -> Dashboards -> Resources`.
 
 5.) Add the card to your dashboard by editing the dashboard and adding a manual card:
 

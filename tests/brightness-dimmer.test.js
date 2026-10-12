@@ -44,7 +44,18 @@ function fixture(pathname = "/lovelace/0", existingLegacy = null, legacyFirst = 
   const document = {
     body,
     documentElement: body,
-    createElement: () => new Element(),
+    createElement(name) {
+      const Card = registry.get(name);
+      if (!Card) return new Element();
+      const element = new Card();
+      // Native custom-element creation rejects constructors that set
+      // attributes (including style) before connection, then leaves an
+      // unupgraded element without setConfig.
+      if (Object.keys(element.style).length || Object.keys(element.attributes).length) {
+        return new Element();
+      }
+      return element;
+    },
     querySelectorAll(selector) {
       const id = selector.match(/^\[id="([^"]+)"\]$/)?.[1];
       return elements.filter((element) => element.id === id);
@@ -84,7 +95,7 @@ function fixture(pathname = "/lovelace/0", existingLegacy = null, legacyFirst = 
   const setStates = (states) => {
     card.hass = { states };
   };
-  return { card, newCard, registry, elements, timers, window, opacity, setStates };
+  return { card, newCard, document, registry, elements, timers, window, opacity, setStates };
 }
 
 function light(brightness, state = "on") {
@@ -94,6 +105,32 @@ function light(brightness, state = "on") {
     attributes: { brightness },
   };
 }
+
+test("native-style construction upgrades the card before applying styles", () => {
+  const f = fixture("/entry-way-hub/0");
+  for (const tagName of ["screen-dimmer-overlay", "night-dim-overlay"]) {
+    const card = f.document.createElement(tagName);
+    assert.equal(typeof card.setConfig, "function", tagName + " must upgrade");
+    assert.equal(Object.keys(card.style).length, 0);
+    card.setConfig({
+      entity: "input_boolean.kiosk_night_dim",
+      brightness_entity: "light.ha_kiosk_screen_dimmer",
+      combine: "either",
+      opacity: 0.5,
+      scope: "dashboard",
+      max_opacity: 0.85,
+    });
+    card.connectedCallback();
+    assert.equal(card.style.pointerEvents, "none");
+    card.hass = { states: {
+      "input_boolean.kiosk_night_dim": {
+        entity_id: "input_boolean.kiosk_night_dim", state: "off",
+      },
+      "light.ha_kiosk_screen_dimmer": light(128),
+    } };
+    assert.equal(f.opacity(), 128 / 255 * MAX_OPACITY);
+  }
+});
 
 test("the light slider controls intermediate tint and both endpoints", () => {
   const f = fixture();

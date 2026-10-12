@@ -295,12 +295,9 @@
   class NightDimOverlay extends HTMLElement {
     constructor() {
       super();
+      // Browsers reject custom elements that gain attributes during
+      // construction. Apply inline styles only after connection.
       this._controller = this._controllerInstance();
-      this.style.display = "block";
-      this.style.width = "0";
-      this.style.height = "0";
-      this.style.overflow = "hidden";
-      this.style.pointerEvents = "none";
     }
 
     setConfig(config) {
@@ -345,6 +342,11 @@
     }
 
     connectedCallback() {
+      this.style.display = "block";
+      this.style.width = "0";
+      this.style.height = "0";
+      this.style.overflow = "hidden";
+      this.style.pointerEvents = "none";
       this._controller.sync();
     }
 
