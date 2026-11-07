@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="440" viewBox="0 0 1040 440" role="img" aria-labelledby="title desc">
+<title id="title">Screen Dimmer slider illustration</title>
+<desc id="desc">Two example dashboard cards with a screen brightness slider. At 100 percent the dashboard is clear. At 40 percent a black click-through overlay dims the dashboard. This is an illustration, not a Home Assistant screenshot.</desc>
+<defs><clipPath id="left"><rect x="40" y="146" width="468" height="230" rx="14"/></clipPath><clipPath id="right"><rect x="532" y="146" width="468" height="230" rx="14"/></clipPath></defs>
+<rect width="1040" height="440" rx="20" fill="#edf2f7"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#172331">
+<text x="40" y="53" font-size="30" font-weight="700">Screen brightness, one simple slider.</text>
+<text x="40" y="83" font-size="16" fill="#526173">A click-through tint for dashboards without backlight control.</text>
+<text x="40" y="129" font-size="18" font-weight="700">100% · Clear</text>
+<text x="532" y="129" font-size="18" font-weight="700">40% · Dimmed</text>
+<g clip-path="url(#left)">
+<rect x="40" y="146" width="468" height="230" fill="#f6f8fb"/>
+<rect x="40" y="146" width="468" height="52" fill="#fff"/>
+<text x="62" y="179" font-size="17" font-weight="700">Home</text>
+<text x="360" y="179" font-size="13" fill="#677789">Example dashboard</text>
+<rect x="62" y="216" width="204" height="74" rx="12" fill="#fff" stroke="#e1e6ec"/>
+<text x="78" y="241" font-size="13" fill="#677789">Living room</text><text x="78" y="272" font-size="21">22°C</text>
+<rect x="278" y="216" width="208" height="74" rx="12" fill="#fff" stroke="#e1e6ec"/>
+<text x="294" y="241" font-size="13" fill="#677789">Porch light</text><text x="294" y="272" font-size="21">Off</text>
+<rect x="62" y="306" width="424" height="52" rx="12" fill="#fff" stroke="#e1e6ec"/>
+<text x="78" y="338" font-size="14" font-weight="700">Screen brightness</text>
+<rect x="312" y="329" width="112" height="6" rx="3" fill="#b7def3"/>
+<circle cx="424" cy="332" r="8" fill="#b7def3"/>
+<text x="436" y="336" font-size="13">100%</text>
+</g>
+<rect x="40" y="146" width="468" height="230" rx="14" fill="none" stroke="#cbd5e1"/>
+<g clip-path="url(#right)">
+<rect x="532" y="146" width="468" height="230" fill="#f6f8fb"/>
+<rect x="532" y="146" width="468" height="52" fill="#fff"/>
+<text x="554" y="179" font-size="17" font-weight="700">Home</text>
+<text x="852" y="179" font-size="13" fill="#677789">Example dashboard</text>
+<rect x="554" y="216" width="204" height="74" rx="12" fill="#fff" stroke="#e1e6ec"/>
+<text x="570" y="241" font-size="13" fill="#677789">Living room</text><text x="570" y="272" font-size="21">22°C</text>
+<rect x="770" y="216" width="208" height="74" rx="12" fill="#fff" stroke="#e1e6ec"/>
+<text x="786" y="241" font-size="13" fill="#677789">Porch light</text><text x="786" y="272" font-size="21">Off</text>
+<rect x="554" y="306" width="424" height="52" rx="12" fill="#fff" stroke="#e1e6ec"/>
+<text x="570" y="338" font-size="14" font-weight="700">Screen brightness</text>
+<rect x="804" y="329" width="112" height="6" rx="3" fill="#dfe4e8"/>
+<rect x="804" y="329" width="33" height="6" rx="3" fill="#b7def3"/>
+<circle cx="837" cy="332" r="8" fill="#b7def3"/>
+<text x="934" y="336" font-size="13">40%</text>
+<rect x="532" y="146" width="468" height="230" fill="#000" opacity=".6"/>
+</g>
+<rect x="532" y="146" width="468" height="230" rx="14" fill="none" stroke="#cbd5e1"/>
+<text x="40" y="412" font-size="14" fill="#526173">Illustration · Sample dashboard and slider · Browser tint, not hardware backlight brightness</text>
+</g></svg>
