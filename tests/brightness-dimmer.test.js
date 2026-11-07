@@ -13,6 +13,8 @@ const MAX_OPACITY = 0.85;
 function fixture(pathname = "/lovelace/0", existingLegacy = null, legacyFirst = false) {
   const elements = [];
   const timers = [];
+  const timeouts = new Map();
+  let timeoutId = 0;
   const registry = new Map();
   if (existingLegacy) registry.set("night-dim-overlay", existingLegacy);
 
@@ -24,6 +26,12 @@ function fixture(pathname = "/lovelace/0", existingLegacy = null, legacyFirst = 
       this.id = "";
     }
 
+    attachShadow() {
+      const input = { value: '0', disabled: false, addEventListener() {}, setAttribute() {}, setCustomValidity(value) { this.error=value; }, reportValidity() {} };
+      const output = { textContent: '' };
+      this.shadowRoot = { innerHTML: '', querySelector: (name) => name === 'input' ? input : output, appendChild() {} };
+      return this.shadowRoot;
+    }
     setAttribute(name, value) {
       this.attributes[name] = value;
     }
@@ -79,6 +87,9 @@ function fixture(pathname = "/lovelace/0", existingLegacy = null, legacyFirst = 
     window,
     customElements,
     HTMLElement: Element,
+    setTimeout: (callback) => { timeouts.set(++timeoutId, callback); return timeoutId; },
+    clearTimeout: (id) => timeouts.delete(id),
+    console: { error() {} },
     setInterval: (callback) => {
       timers.push(callback);
       return timers.length;
@@ -95,7 +106,7 @@ function fixture(pathname = "/lovelace/0", existingLegacy = null, legacyFirst = 
   const setStates = (states) => {
     card.hass = { states };
   };
-  return { card, newCard, document, registry, elements, timers, window, opacity, setStates };
+  return { card, newCard, document, registry, elements, timers, timeouts, window, opacity, setStates };
 }
 
 function light(brightness, state = "on") {
@@ -432,4 +443,68 @@ test("boolean fallback obeys configured maximum in combined mode", () => {
     "light.ha_kiosk_screen_dimmer": light(0, "off"),
   } };
   assert.equal(f.opacity(), 0.3);
+});
+
+function sliderFixture(mode = 'brightness', callService = async () => {}) {
+  const f = fixture();
+  const slider = new (f.registry.get('screen-dimmer-slider'))();
+  slider.setConfig({entity: 'light.ha_kiosk_screen_dimmer', mode});
+  slider.isConnected = true;
+  slider.connectedCallback();
+  slider.hass = {states: {'light.ha_kiosk_screen_dimmer': light(0, 'off')}, callService};
+  return {...f, slider};
+}
+
+test('live input previews immediately before release or any service response', () => {
+  const calls=[];
+  const f=sliderFixture('brightness', (...args)=>{calls.push(args);return Promise.resolve();});
+  f.slider._input.value='50';f.slider._queue(false);
+  assert.ok(Math.abs(f.opacity()-.5)<.002);
+  assert.equal(calls.length,0);
+  assert.equal(f.slider._input.disabled,false);
+  assert.equal(f.slider._input.min,'15');
+  f.slider.hass={states:{'light.ha_kiosk_screen_dimmer':light(0,'off')}};
+  assert.ok(Math.abs(f.opacity()-.5)<.002, 'old state cannot overwrite preview');
+  f.slider.disconnectedCallback();assert.equal(f.opacity(),0);
+});
+
+test('rapid inputs coalesce and final release waits for the in-flight call', async () => {
+  const calls=[],resolvers=[];
+  const f=sliderFixture('brightness', (...args)=>{calls.push(args);return new Promise(resolve=>resolvers.push(resolve));});
+  const s=f.slider;
+  s._input.value='70';s._queue(false);
+  s._input.value='60';s._queue(false);
+  assert.equal(f.timeouts.size,1);
+  await [...f.timeouts.values()][0]();f.timeouts.clear();
+  assert.equal(calls.length,1);
+  assert.equal(calls[0][2].brightness,120);
+  s._input.value='40';s._queue(false);
+  s._input.value='100';s._queue(true);
+  assert.equal(calls.length,1, 'no overlapping service calls');
+  assert.equal(f.opacity(),0, 'full brightness previews without waiting');
+  resolvers.shift()();await Promise.resolve();await Promise.resolve();
+  assert.equal(calls.length,2);
+  assert.equal(calls[1][1],'turn_off');
+  resolvers.shift()();await Promise.resolve();await Promise.resolve();
+  s.disconnectedCallback();
+});
+
+test('service failures clear preview and leave the slider usable', async () => {
+  const f=sliderFixture('tint',async()=>{throw new Error('offline');});
+  f.slider._input.value='100';f.slider._queue(true);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(f.opacity(),0);
+  assert.equal(f.slider._input.disabled,false);
+  assert.ok(f.slider._input.error);
+});
+
+test('disconnect cancels queued changes and removes the local preview', () => {
+  const calls=[];
+  const f=sliderFixture('tint',async(...args)=>calls.push(args));
+  f.slider._input.value='100';f.slider._queue(false);
+  assert.equal(f.opacity(),.85);
+  f.slider.isConnected=false;f.slider.disconnectedCallback();
+  assert.equal(f.timeouts.size,0);
+  assert.equal(f.opacity(),0);
+  assert.equal(calls.length,0);
 });

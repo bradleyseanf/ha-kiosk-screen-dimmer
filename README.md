@@ -21,7 +21,7 @@ The light brightness controls tint strength, not the display backlight. Off or 0
 
 Home Assistant will create the virtual light entity automatically.
 
-4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.0.3` as a JavaScript module in `Settings -> Dashboards -> Resources`.
+4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.0.4` as a JavaScript module in `Settings -> Dashboards -> Resources`.
 
 5.) Add the card to your dashboard by editing the dashboard and adding a manual card:
 
@@ -32,17 +32,27 @@ entity: light.ha_kiosk_screen_dimmer
 
 You only need to add that overlay card once in a browser tab. It stays active across Lovelace view changes within that dashboard and keeps following the live Home Assistant state while that tab stays open.
 
-Use a visible control card for the light entity, for example:
+For live dimming while your finger moves, add the included slider instead of a third-party light control:
 
 ```yaml
-type: custom:bubble-card
-card_type: button
+type: custom:screen-dimmer-slider
 entity: light.ha_kiosk_screen_dimmer
-name: Screen Dimmer
-icon: mdi:brightness-6
-button_type: slider
-light_slider_type: brightness
 ```
+
+The slider previews the tint locally on every input event, sends coalesced Home Assistant updates while dragging, and saves the final value on release. It keeps one service call in flight at a time, so slow responses cannot reorder the final setting. Third-party sliders that only send a value on release retain their own behavior.
+
+By default the control shows tint strength: 0% clears the tint and 100% reaches `max_opacity`. For a screen-brightness control where 100% is fully bright:
+
+```yaml
+type: custom:screen-dimmer-slider
+entity: light.ha_kiosk_screen_dimmer
+mode: brightness
+name: Screen brightness
+max_opacity: 0.85
+```
+
+With the default maximum tint, brightness ranges from 15% to 100%. This changes the browser overlay, not the hardware backlight. The slider includes the overlay automatically, so it does not require a separate overlay card. Use one dimmer control/overlay configuration per browser tab. The slider requires a brightness-capable `light` entity; optional `mode: brightness` and `name` customize its direction and accessible label. `max_opacity`, `color`, `transition`, `overlay_id`, `z_index`, and `scope` configure its overlay as described below.
+
 
 ## Attributes
 

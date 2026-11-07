@@ -65,6 +65,10 @@
         this._applyOpacity(0);
         return;
       }
+      if (this.previewBrightness !== undefined) {
+        this._applyOpacity(this.previewBrightness / 255 * this.config.max_opacity);
+        return;
+      }
       const controlState = this._state(liveHass, this.config.entity);
       const explicitSource = this.config.brightness_entity
         ? this._state(liveHass, this.config.brightness_entity)
@@ -341,6 +345,17 @@
       this._controller.updateHass(hass);
     }
 
+    previewBrightness(brightness) {
+      if (!Number.isFinite(brightness)) return;
+      this._controller.previewBrightness = Math.max(0, Math.min(255, brightness));
+      this._controller.sync();
+    }
+
+    clearPreview() {
+      delete this._controller.previewBrightness;
+      this._controller.sync();
+    }
+
     connectedCallback() {
       this.style.display = "block";
       this.style.width = "0";
@@ -381,6 +396,113 @@
       return window[GLOBAL_KEY].controller;
     }
   }
+
+  // Compact control with immediate local preview and one service call at a time.
+  class ScreenDimmerSlider extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      this.shadowRoot.innerHTML = `<style>
+        :host{display:inline-flex;align-items:center;gap:10px;color:inherit;font:inherit}
+        input{width:112px;height:30px;margin:0;accent-color:#b7def3;cursor:pointer}
+        output{min-width:3.5ch;text-align:right;font-size:.8em;font-variant-numeric:tabular-nums}
+      </style><input type="range" min="0" max="100" step="1" aria-label="Screen dimmer"><output></output>`;
+      this._input = this.shadowRoot.querySelector('input');
+      this._output = this.shadowRoot.querySelector('output');
+      this._input.addEventListener('input', () => this._queue(false));
+      this._input.addEventListener('change', () => this._queue(true));
+      this._input.addEventListener('pointercancel', () => this._queue(true));
+      this._input.addEventListener('blur', () => { if (this._dragging) this._queue(true); });
+      this._overlay = new NightDimOverlay();
+    }
+    setConfig(config) {
+      if (!config?.entity?.startsWith('light.')) throw new Error('Screen Dimmer slider requires a light entity.');
+      this._config = config;
+      this._max = Math.min(0.95, Math.max(0, Number(config.max_opacity ?? 0.85)));
+      if (!Number.isFinite(this._max) || this._max === 0) throw new Error('max_opacity must be greater than zero and at most 0.95.');
+      this._brightnessMode = config.mode === 'brightness';
+      this._input.min = this._brightnessMode ? String(Math.ceil((1 - this._max) * 100 - 1e-9)) : '0';
+      this._input.setAttribute('aria-label', config.name || (this._brightnessMode ? 'Screen brightness' : 'Screen dimmer'));
+      this._overlay.setConfig(config);
+      this._render();
+    }
+    set hass(hass) {
+      this._hass = hass;
+      this._overlay.hass = hass;
+      this._render();
+    }
+    connectedCallback() {
+      this.shadowRoot.appendChild(this._overlay);
+      this._render();
+    }
+    disconnectedCallback() {
+      clearTimeout(this._timer);
+      clearTimeout(this._settle);
+      this._pending = null;
+      this._dragging = false;
+      this._overlay.clearPreview();
+    }
+    getCardSize() { return 1; }
+    _render() {
+      const state = this._hass?.states?.[this._config?.entity];
+      this._input.disabled = !state || ['unknown', 'unavailable'].includes(state.state) || this._hass?.connected === false;
+      if (this._dragging || this._sending || this._pending != null) return;
+      const ratio = state?.state === 'on' ? (state.attributes.brightness || 0) / 255 : 0;
+      this._input.value = String(Math.round(this._brightnessMode ? (1 - ratio * this._max) * 100 : ratio * 100));
+      this._label();
+    }
+    _label() {
+      this._output.textContent = this._input.value + '%';
+      this._input.setAttribute('aria-valuetext', this._input.value + ' percent');
+    }
+    _queue(final) {
+      if (this._input.disabled || !this._config) return;
+      clearTimeout(this._settle);
+      this._dragging = !final;
+      this._label();
+      const level = Number(this._input.value);
+      this._pending = Math.max(0, Math.min(255, Math.round(this._brightnessMode ? (100 - level) / (100 * this._max) * 255 : level / 100 * 255)));
+      this._overlay.previewBrightness(this._pending);
+      if (final) {
+        clearTimeout(this._timer);
+        this._timer = null;
+        this._flush();
+      } else if (!this._timer && !this._sending) {
+        this._timer = setTimeout(() => { this._timer = null; this._flush(); }, 100);
+      }
+    }
+    async _flush() {
+      if (this._sending || this._pending == null || !this.isConnected) return;
+      const brightness = this._pending;
+      this._pending = null;
+      this._sending = true;
+      let failed = false;
+      try {
+        await this._hass.callService('light', brightness ? 'turn_on' : 'turn_off', {
+          entity_id: this._config.entity, ...(brightness ? { brightness } : {}),
+        });
+        this._input.setCustomValidity('');
+      } catch (error) {
+        failed = true;
+        this._pending = null;
+        this._dragging = false;
+        this._overlay.clearPreview();
+        this._input.setCustomValidity('Could not update the screen dimmer. Try again.');
+        this._input.reportValidity();
+        console.error('Screen dimmer update failed', error);
+      } finally {
+        this._sending = false;
+        if (this.isConnected && this._pending != null) {
+          if (!this._dragging) this._flush();
+          else this._timer = setTimeout(() => { this._timer = null; this._flush(); }, 100);
+        } else if (this.isConnected && !failed && !this._dragging) {
+          // Allow the state_changed event to arrive before releasing the preview.
+          this._settle = setTimeout(() => { this._overlay.clearPreview(); this._render(); }, 1000);
+        } else if (failed) this._render();
+      }
+    }
+  }
+  if (!customElements.get('screen-dimmer-slider')) customElements.define('screen-dimmer-slider', ScreenDimmerSlider);
 
   // New card name cannot be captured by the installed legacy script. Keep
   // the old name as an alias only when no other script has registered it.
