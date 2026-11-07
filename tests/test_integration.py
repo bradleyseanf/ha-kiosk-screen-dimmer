@@ -53,6 +53,7 @@ stub(
     LightEntity=LightEntity,
 )
 stub("homeassistant.helpers", __path__=[])
+stub("homeassistant.helpers.config_validation", config_entry_only_config_schema=lambda domain: domain)
 stub("homeassistant.helpers.entity_platform", AddConfigEntryEntitiesCallback=object)
 
 integration = importlib.import_module("custom_components.ha_kiosk_screen_dimmer")
@@ -101,7 +102,7 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(integration.DOMAIN, "ha_kiosk_screen_dimmer")
         self.assertEqual(manifest["domain"], integration.DOMAIN)
         self.assertEqual(manifest["name"], "Screen Dimmer")
-        self.assertEqual(manifest["version"], "0.0.4")
+        self.assertRegex(manifest["version"], r"^\d+\.\d+\.\d+$")
         self.assertEqual(flow.NAME, "Screen Dimmer")
         entity = light.KioskScreenDimmerLight("existing-entry-id")
         self.assertEqual(entity.unique_id, "ha_kiosk_screen_dimmer_existing-entry-id")
@@ -175,3 +176,4 @@ class TestIntegration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

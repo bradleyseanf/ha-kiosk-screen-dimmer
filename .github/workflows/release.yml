@@ -1,34 +1,36 @@
 name: Publish Screen Dimmer release
+
 on:
   push:
     branches: [main]
-    paths:
-      - custom_components/ha_kiosk_screen_dimmer/manifest.json
-      - .github/workflows/release.yml
   workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
+
 concurrency:
   group: screen-dimmer-release
   cancel-in-progress: false
+
 jobs:
+  validate:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+
   release:
+    name: Publish tested release and PR changelog
+    if: github.ref == 'refs/heads/main'
+    needs: validate
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - name: Test
-        run: |
-          node --test tests/brightness-dimmer.test.js
-          python -m unittest discover -s tests -p 'test_*.py'
-      - name: Publish manifest version
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Publish manifest version with merged PR notes
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: |
-          version=$(python -c 'import json; print(json.load(open("custom_components/ha_kiosk_screen_dimmer/manifest.json"))["version"])')
-          tag="v$version"
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "Release $tag already exists."
-          else
-            gh release create "$tag" --target "$GITHUB_SHA" --title "Screen Dimmer $tag" --generate-notes --latest
-          fi
+        run: bash scripts/publish_release.sh

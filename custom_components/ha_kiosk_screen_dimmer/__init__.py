@@ -5,10 +5,13 @@ from pathlib import Path
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv
 
 DOMAIN = "ha_kiosk_screen_dimmer"
 NAME = "Screen Dimmer"
 LEGACY_NAME = "HA Kiosk Screen Dimmer"
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 PLATFORMS: list[str] = ["light"]
 RESOURCE_PATH = "/ha_kiosk_screen_dimmer/brightness-dimmer.js"
@@ -39,3 +42,4 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
