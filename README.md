@@ -25,7 +25,7 @@ Home Assistant 2025.3.0 or later and a browser that supports custom elements. Th
 
 Home Assistant will create the virtual light entity automatically.
 
-4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.0.5` as a JavaScript module in `Settings -> Dashboards -> Resources`.
+4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.1.0` as a JavaScript module in `Settings -> Dashboards -> Resources`.
 
 5.) Add the card to your dashboard by editing the dashboard and adding a manual card:
 
