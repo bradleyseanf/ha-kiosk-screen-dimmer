@@ -35,6 +35,7 @@ class TestRepository(unittest.TestCase):
         text = translations["config"]["abort"]["single_instance_allowed"]
         self.assertTrue(text)
         self.assertNotIn("[%key:", text)
+        self.assertTrue(translations["config"]["step"]["user"]["title"])
 
     def test_semantic_version_parser(self):
         self.assertLess(parse_version("0.0.9"), parse_version("0.0.10"))

@@ -53,6 +53,7 @@ stub(
     LightEntity=LightEntity,
 )
 stub("homeassistant.helpers", __path__=[])
+stub("homeassistant.helpers.config_validation", config_entry_only_config_schema=lambda domain: domain)
 stub("homeassistant.helpers.entity_platform", AddConfigEntryEntitiesCallback=object)
 
 integration = importlib.import_module("custom_components.ha_kiosk_screen_dimmer")
