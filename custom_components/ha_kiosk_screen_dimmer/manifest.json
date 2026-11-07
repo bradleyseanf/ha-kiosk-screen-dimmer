@@ -1,11 +1,18 @@
 {
   "domain": "ha_kiosk_screen_dimmer",
   "name": "Screen Dimmer",
-  "codeowners": [],
+  "codeowners": [
+    "@bradleyseanf"
+  ],
   "config_flow": true,
   "dependencies": [
     "http"
   ],
+  "documentation": "https://github.com/bradleyseanf/ha-kiosk-screen-dimmer",
+  "integration_type": "helper",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/bradleyseanf/ha-kiosk-screen-dimmer/issues",
   "requirements": [],
-  "version": "0.0.4"
+  "single_config_entry": true,
+  "version": "0.0.5"
 }

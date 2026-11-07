@@ -11,6 +11,10 @@ It is controllable either by:
 
 The light brightness controls tint strength, not the display backlight. Off or 0% means no tint; each light brightness value from 1 to 255 maps to its own opacity with a short fade. At 100%, the tint reaches the configured maximum opacity (85% by default); the absolute cap is 95%.
 
+## Requirements
+
+Home Assistant 2025.3.0 or later and a browser that supports custom elements. The integration controls a browser tint, not hardware backlight brightness.
+
 ## Installation
 
 1.) In HACS, add `https://github.com/bradleyseanf/ha-kiosk-screen-dimmer` as a custom repository of type `Integration`, then install Screen Dimmer. This is a custom-repository install, not a default HACS listing. Alternatively, copy the `custom_components/ha_kiosk_screen_dimmer` folder into `/homeassistant/custom_components/`. The packaged folder includes the JavaScript file; no separate `www` copy is needed.
@@ -21,7 +25,7 @@ The light brightness controls tint strength, not the display backlight. Off or 0
 
 Home Assistant will create the virtual light entity automatically.
 
-4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.0.4` as a JavaScript module in `Settings -> Dashboards -> Resources`.
+4.) Add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.0.5` as a JavaScript module in `Settings -> Dashboards -> Resources`.
 
 5.) Add the card to your dashboard by editing the dashboard and adding a manual card:
 
@@ -71,3 +75,49 @@ With the default maximum tint, brightness ranges from 15% to 100%. This changes 
 | `scope` | string | `dashboard` | Limit the overlay to this dashboard by default; `view` or `all` must be selected explicitly. |
 
 For a scheduled night toggle plus an independent light slider, use one `custom:screen-dimmer-overlay` card with the toggle as `entity`, the light as `brightness_entity`, and `combine: either`. An enabled toggle retains its configured `opacity` when the slider is off or unavailable; both off clears the tint. The overlay is click-through and never exceeds `max_opacity` or the 0.95 absolute cap.
+
+
+## Development and releases
+
+Use `dev` for development and open release pull requests from `dev` to `main`.
+Every pull request to `main` must increase the version in
+`custom_components/ha_kiosk_screen_dimmer/manifest.json`. Update the resource version
+in this README when changing the frontend so browsers load the new JavaScript.
+
+CI runs JavaScript behavior tests, focused Python tests, metadata checks, Hassfest,
+and HACS validation for pushes and pull requests to `dev` and `main`. It also runs
+weekly to catch upstream validation changes. The Python tests use lightweight
+Home Assistant stubs; they do not replace testing in a running Home Assistant instance.
+
+After a push or merged pull request to `main`, the release workflow runs the same
+checks and publishes `v<manifest version>` only if they all pass. The GitHub release
+changelog is generated from merged pull requests, grouped by labels using
+`.github/release.yml`. Existing releases are never overwritten.
+
+[Read the changelog and releases](https://github.com/bradleyseanf/ha-kiosk-screen-dimmer/releases).
+HACS installs published releases; the development branch is hidden from its download choices.
+
+Dependabot checks pinned GitHub Actions weekly and opens grouped update pull
+requests against `dev`. There are no third-party Python or npm package dependencies
+to update. Dependency alerts/security settings are separate GitHub repository settings.
+
+Run the local checks with:
+
+```sh
+node --check custom_components/ha_kiosk_screen_dimmer/brightness-dimmer.js
+node --test tests/brightness-dimmer.test.js
+python -m unittest discover -s tests -p 'test_*.py'
+python -m compileall -q custom_components scripts
+```
+
+### HACS default catalog
+
+Custom-repository installation is available as described above. Default catalog
+inclusion is a separate review by the HACS maintainers and is not guaranteed by
+publishing a release. Before submission, the repository must have an OSI-approved
+license, description and topics, and passing HACS and Hassfest checks without
+ignored validations. Publish a new release after those checks pass, then submit
+the repository to the `integration` list in
+[hacs/default](https://github.com/hacs/default).
+
+See the [HACS submission requirements](https://hacs.xyz/docs/publish/include/).

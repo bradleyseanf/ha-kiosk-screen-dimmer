@@ -101,7 +101,7 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(integration.DOMAIN, "ha_kiosk_screen_dimmer")
         self.assertEqual(manifest["domain"], integration.DOMAIN)
         self.assertEqual(manifest["name"], "Screen Dimmer")
-        self.assertEqual(manifest["version"], "0.0.4")
+        self.assertRegex(manifest["version"], r"^\d+\.\d+\.\d+$")
         self.assertEqual(flow.NAME, "Screen Dimmer")
         entity = light.KioskScreenDimmerLight("existing-entry-id")
         self.assertEqual(entity.unique_id, "ha_kiosk_screen_dimmer_existing-entry-id")
@@ -175,3 +175,4 @@ class TestIntegration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
