@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from homeassistant.components import frontend
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -37,9 +38,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if entry.title == LEGACY_NAME:
         hass.config_entries.async_update_entry(entry, title=NAME)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    data = hass.data.setdefault(DOMAIN, {})
+    if not data.get("frontend_registered"):
+        frontend.add_extra_js_url(hass, RESOURCE_PATH)
+        data["frontend_registered"] = True
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unloaded and hass.data.get(DOMAIN, {}).get("frontend_registered"):
+        frontend.remove_extra_js_url(hass, RESOURCE_PATH)
+        hass.data[DOMAIN]["frontend_registered"] = False
+    return unloaded
 
