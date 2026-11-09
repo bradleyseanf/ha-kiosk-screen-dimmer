@@ -1,5 +1,10 @@
 # Screen Dimmer
 
+[![HACS default catalog](https://img.shields.io/badge/HACS-Default-41BDF5?logo=homeassistant&logoColor=white)](https://github.com/hacs/default/pull/13618)
+[![Latest release](https://img.shields.io/github/v/release/bradleyseanf/ha-kiosk-screen-dimmer)](https://github.com/bradleyseanf/ha-kiosk-screen-dimmer/releases/latest)
+[![CI on dev](https://img.shields.io/github/actions/workflow/status/bradleyseanf/ha-kiosk-screen-dimmer/ci.yml?branch=dev)](https://github.com/bradleyseanf/ha-kiosk-screen-dimmer/actions/workflows/ci.yml?query=branch%3Adev)
+[![License](https://img.shields.io/github/license/bradleyseanf/ha-kiosk-screen-dimmer)](LICENSE)
+
 Dim a Home Assistant kiosk screen with a smooth, click-through tint and a simple slider. Useful when your display cannot expose its backlight controls.
 
 ![The included slider at 100% and 40% screen brightness in a sample dashboard](docs/images/slider-example.svg)
@@ -23,6 +28,14 @@ name: Screen brightness
 ```
 
 Use the entity ID created by your integration if it differs. The slider includes the overlay, so no extra card is needed.
+
+### Add the integration
+
+After installing Screen Dimmer and restarting Home Assistant (steps 1–2), use this button to open its setup flow:
+
+[![Add integration to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=ha_kiosk_screen_dimmer)
+
+The button starts configuration only; it does not install the custom integration or add the dashboard resource and card. Continue with steps 3–4 after setup. If the link does not open your instance, use **Settings → Devices & services → Add integration → Screen Dimmer** instead.
 
 ### Custom-repository fallback
 
