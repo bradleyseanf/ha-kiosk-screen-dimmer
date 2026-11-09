@@ -10,7 +10,7 @@ Dim a Home Assistant kiosk screen with a smooth, click-through tint and a simple
 
 Requires **Home Assistant 2025.3.0 or later**.
 
-1. In HACS, add `https://github.com/bradleyseanf/ha-kiosk-screen-dimmer` as a **custom repository → Integration**, then install **Screen Dimmer**. Default HACS catalog inclusion is pending.
+1. Open **HACS**, search for **Screen Dimmer**, and install it. If it is not listed yet, use the custom-repository fallback below.
 2. Restart Home Assistant, then add **Screen Dimmer** under **Settings → Devices & services → Add integration**.
 3. Under **Settings → Dashboards → Resources**, add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.1.0` as a **JavaScript module**. Enable Advanced Mode in your profile if Resources is hidden.
 4. Add a **Manual** dashboard card:
@@ -23,6 +23,12 @@ name: Screen brightness
 ```
 
 Use the entity ID created by your integration if it differs. The slider includes the overlay, so no extra card is needed.
+
+### Custom-repository fallback
+
+Screen Dimmer is included in the default HACS catalog. If your HACS catalog has not refreshed yet, add `https://github.com/bradleyseanf/ha-kiosk-screen-dimmer` under **Custom repositories** with category **Integration**, install **Screen Dimmer**, then continue with steps 2–4 above.
+
+### Manual installation
 
 Without HACS, copy `custom_components/ha_kiosk_screen_dimmer` into your Home Assistant `config/custom_components` directory, then follow steps 2–4. No separate `www` copy is needed.
 
