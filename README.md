@@ -15,7 +15,7 @@ Dim a Home Assistant kiosk screen with a smooth, click-through tint and a simple
 
 Requires **Home Assistant 2025.3.0 or later**.
 
-1. Open **HACS**, search for **Screen Dimmer**, and install it. If it is not listed yet, use the custom-repository fallback below.
+1. On Home Assistant **2026.11 or later**, open **Settings → Marketplace**, search for **Screen Dimmer**, and install it. On earlier supported versions, open **HACS** and search for **Screen Dimmer** instead. If it is not listed yet, use the custom-repository fallback below.
 2. Restart Home Assistant, then add **Screen Dimmer** under **Settings → Devices & services → Add integration**.
 3. Under **Settings → Dashboards → Resources**, add `/ha_kiosk_screen_dimmer/brightness-dimmer.js?v=0.1.0` as a **JavaScript module**. Enable Advanced Mode in your profile if Resources is hidden.
 4. Add a **Manual** dashboard card:
@@ -39,11 +39,17 @@ The button starts configuration only; it does not install the custom integration
 
 ### Custom-repository fallback
 
-Screen Dimmer is included in the default HACS catalog. If your HACS catalog has not refreshed yet, add `https://github.com/bradleyseanf/ha-kiosk-screen-dimmer` under **Custom repositories** with category **Integration**, install **Screen Dimmer**, then continue with steps 2–4 above.
+Screen Dimmer is included in the default HACS catalog. If your HACS / Marketplace catalog has not refreshed yet, add `https://github.com/bradleyseanf/ha-kiosk-screen-dimmer` under **Custom repositories** with category **Integration**, install **Screen Dimmer**, then continue with steps 2–4 above.
 
 ### Manual installation
 
-Without HACS, copy `custom_components/ha_kiosk_screen_dimmer` into your Home Assistant `config/custom_components` directory, then follow steps 2–4. No separate `www` copy is needed.
+HACS / Marketplace is optional. To install manually:
+
+1. Download the source archive from the [latest release](https://github.com/bradleyseanf/ha-kiosk-screen-dimmer/releases/latest) and extract it.
+2. Copy `custom_components/ha_kiosk_screen_dimmer` into your Home Assistant `config/custom_components` directory, creating the directory if needed.
+3. Follow quick-start steps 2–4: restart Home Assistant, add the integration, register the JavaScript module, and add the dashboard card.
+
+No separate `www` copy is needed. The resource step above applies to **Screen Dimmer v0.1.0**; automatic frontend loading is being developed separately and is not part of that release.
 
 ## How it works
 
