@@ -46,6 +46,11 @@ class StaticPathConfig:
 
 stub("homeassistant.components.http", StaticPathConfig=StaticPathConfig)
 stub(
+    "homeassistant.components.frontend",
+    add_extra_js_url=lambda hass, url: hass.frontend_calls.append(("add", url)),
+    remove_extra_js_url=lambda hass, url: hass.frontend_calls.append(("remove", url)),
+)
+stub(
     "homeassistant.components.light",
     ATTR_BRIGHTNESS="brightness",
     ATTR_BRIGHTNESS_PCT="brightness_pct",
@@ -63,6 +68,7 @@ flow = importlib.import_module("custom_components.ha_kiosk_screen_dimmer.config_
 
 class FakeEntries:
     def __init__(self):
+        self.unload_success = True
         self.renames = []
         self.forwarded = []
         self.unloaded = []
@@ -76,7 +82,7 @@ class FakeEntries:
 
     async def async_unload_platforms(self, entry, platforms):
         self.unloaded.append((entry, platforms))
-        return True
+        return self.unload_success
 
 
 class FakeHTTP:
@@ -90,6 +96,7 @@ class FakeHTTP:
 class FakeHass:
     def __init__(self):
         self.data = {}
+        self.frontend_calls = []
         self.config_entries = FakeEntries()
         self.http = FakeHTTP()
 
@@ -157,7 +164,7 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(Path(resource.path).read_bytes(), (ROOT / "brightness-dimmer.js").read_bytes())
         self.assertEqual(
             json.loads((ROOT / "custom_components/ha_kiosk_screen_dimmer/manifest.json").read_text())["dependencies"],
-            ["http"],
+            ["frontend", "http"],
         )
 
     def test_unload_and_reload_do_not_reregister_process_static_route(self):
@@ -172,6 +179,33 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(len(hass.config_entries.unloaded), 1)
         self.assertEqual(len(hass.config_entries.forwarded), 2)
         self.assertEqual(entry.title, "Custom screen name")
+
+    def test_auto_module_is_idempotent_and_does_not_edit_resources(self):
+        hass = FakeHass()
+        entry = types.SimpleNamespace(title="Screen Dimmer")
+        asyncio.run(integration.async_setup(hass, {}))
+        self.assertEqual(hass.frontend_calls, [])
+        for _ in range(2):
+            asyncio.run(integration.async_setup_entry(hass, entry))
+        self.assertEqual(hass.frontend_calls, [("add", integration.RESOURCE_PATH)])
+        self.assertEqual(set(hass.data), {integration.DOMAIN})
+
+    def test_unload_failure_preserves_module_then_reload_registers_again(self):
+        hass = FakeHass()
+        entry = types.SimpleNamespace(title="Screen Dimmer")
+        asyncio.run(integration.async_setup(hass, {}))
+        asyncio.run(integration.async_setup_entry(hass, entry))
+        hass.config_entries.unload_success = False
+        self.assertFalse(asyncio.run(integration.async_unload_entry(hass, entry)))
+        self.assertEqual(len(hass.frontend_calls), 1)
+        hass.config_entries.unload_success = True
+        self.assertTrue(asyncio.run(integration.async_unload_entry(hass, entry)))
+        asyncio.run(integration.async_setup_entry(hass, entry))
+        self.assertEqual(hass.frontend_calls, [
+            ("add", integration.RESOURCE_PATH),
+            ("remove", integration.RESOURCE_PATH),
+            ("add", integration.RESOURCE_PATH),
+        ])
 
 
 if __name__ == "__main__":
